@@ -49,12 +49,15 @@ void connectToChat() {
 
 CALLBACK_F(void, update_ws) {
 	Util::timer_start(pingServer, 20000);
-	_connection = true;
-	connectToChat();
 	Util::timer_start(connectToChat, 5000);
 }
 
+CALLBACK_F(void, OnDisable, GDA_MODULE* pModule, bool status) {
+	_connection = !status;
+}
+
 CALLBACK_F(void, OnModuleDraw, GDA_MODULE* pModule) {
+	if (_connection == false) _connection = true;
 	if (moduleSettings._show) {
 		if (!moduleSettings._settingsLoaded) {
 			moduleSettings._settingsLoaded = true;
@@ -116,6 +119,7 @@ GDA_MODULE_CALLBACK(GDA_MODULE* pModule) {
 			ImGui::SetNextWindowFocus();
 	});
 	pModule->registerDrawCallback(OnModuleDraw);
+	pModule->setModuleDisableCallback(OnDisable);
 	pModule->setClickName("  open  ");
 	return true;
 }
